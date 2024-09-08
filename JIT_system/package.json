@@ -1,9 +1,12 @@
 {
+  "homepage": "https://rithvikailas.github.io/Jit-system/",
   "name": "jit_system",
   "version": "1.0.0",
   "description": "",
   "main": "backend/app.js",
   "scripts": {
+    "predeploy": "npm start",
+    "deploy": "gh-pages -d build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node backend/app.js"
   },
