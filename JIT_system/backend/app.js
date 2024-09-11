@@ -66,5 +66,47 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend', req.path));
 });
 
+// API endpoint to mark material as sent
+// API endpoint to mark material as received
+// API endpoint to mark material as received
+// Assuming you are using Express.js
+// Ensure this endpoint is in your backend code
+// In your backend code (e.g., app.js or routes file)
+app.put('/api/materials/send/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const material = await Material.findById(id);
+        
+        if (!material) {
+            return res.status(404).send('Material not found');
+        }
+
+        material.status = 'Sent';  // Update status or set a field that indicates it's been sent
+        await material.save();
+        res.status(200).json(material);
+    } catch (error) {
+        console.error('Error updating material status:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+// DELETE material by ID
+app.delete('/api/materials/:id', (req, res) => {
+    const materialId = req.params.id;
+
+    Material.findByIdAndDelete(materialId, (err, result) => {
+        if (err) {
+            console.error('Error deleting material:', err);
+            res.status(500).send({ error: 'Error deleting material' });
+        } else if (!result) {
+            res.status(404).send({ message: 'Material not found' });
+        } else {
+            res.status(200).send({ message: 'Material deleted successfully' });
+        }
+    });
+});
+
+
+
 const port = 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
