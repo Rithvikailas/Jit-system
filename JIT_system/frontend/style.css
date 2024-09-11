@@ -132,3 +132,88 @@ td button:hover {
     text-align: center;
     margin-top: 20px;
 }
+
+#stopSoundBtn {
+    position: absolute; /* Fix the button at a specific position */
+    top: 10px;       /* Position it 20px from the top */
+    right: 10px;     /* Position it 20px from the right */
+    padding: 10px 20px; /* Padding around the button for better look */
+    background-color: #ff4c4c; /* Red color to indicate it's a stop action */
+    color: white;    /* White text color */
+    border: none;    /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Increase font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+    z-index: 1000; /* Ensure it stays above other elements */
+}
+#stopSoundBtnn {
+    position: fixed; /* Fix the button at a specific position */
+    top: 10px;       /* Position it 20px from the top */
+    right: 180px;     /* Position it 20px from the right */
+    padding: 10px 20px; /* Padding around the button for better look */
+    background-color: #333702; /* Red color to indicate it's a stop action */
+    color: white;    /* White text color */
+    border: none;    /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Increase font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+    z-index: 1000; /* Ensure it stays above other elements */
+}
+
+#stopSoundBtn:hover {
+    background-color: #ff1f1f; /* Darker red on hover */
+}
+
+
+/* Add these styles to your style.css */
+
+/* Add these styles to your style.css */
+
+/* Style for the "Send" button */
+button.send {
+    background-color: rgb(147, 147, 11); /* Yellow background for "Send" button */
+    color: rgb(241, 236, 236); /* Black text color */
+    border: 1px solid #210909; /* Light border for better visibility */
+    padding: 5px 10px; /* Padding for better size */
+    cursor: pointer; /* Pointer cursor to indicate it's clickable */
+    border-radius: 4px; /* Rounded corners for a modern look */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for the "Send" button */
+button.send:hover {
+    background-color: #06e13d;
+    color: #f30b0b; /* Slightly lighter background on hover */
+}
+
+/* Style for the "Sent" button */
+button.sent {
+    background-color: rgb(197, 200, 13); /* Green background for "Sent" button */
+    color: rgb(83, 7, 7); /* White text color */
+    border: 1px solid #1e0202; /* Light border for better visibility */
+    padding: 5px 10px; /* Padding for better size */
+    cursor: not-allowed; /* Not-allowed cursor to indicate it's disabled */
+    border-radius: 4px; /* Rounded corners for a modern look */
+    font-weight: bold; /* Bold text */
+}
+
+/* Optional: style for the button when disabled */
+button[disabled] {
+    opacity: 0.6; /* Make disabled button slightly transparent */
+}
+
+button.Received {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+    cursor: pointer;  /* Disable cursor interaction since it's received */
+}
+
+button.Received:hover{
+    background-color: #0a9d2f;
+}
