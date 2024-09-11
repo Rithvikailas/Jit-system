@@ -52,6 +52,7 @@ function fetchMaterials() {
 
             const tableBody = document.querySelector('#materialTable tbody');
             tableBody.innerHTML = ''; // Clear existing rows
+            
 
             paginatedMaterials.forEach(material => {
                 const row = document.createElement('tr');
@@ -62,7 +63,13 @@ function fetchMaterials() {
                     <td>${material.quantity ? material.quantity : '-'}</td>
                     <td>${material.description ? material.description : '-'}</td>
                     <td>
-                        <button onclick="deleteMaterial('${material._id}')">Delete</button>
+                        <button class="${material.status === 'Sent' ? 'Received' : 'Delete'}" onclick="handleReceived('${material._id}', '${material.status}')">
+                            ${material.status === 'Sent' ? 'Received' : 'Delete'}
+                        </button>
+                    </td>
+
+                    
+                </td>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -76,20 +83,28 @@ function fetchMaterials() {
         });
 }
 
-function deleteMaterial(id) {
-    fetch(`/api/materials/${id}`, {
-        method: 'DELETE',
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert('Material deleted successfully');
-        fetchMaterials(); // Refresh the table after deletion
-    })
-    .catch(error => {
-        console.error('Error deleting material:', error);
-        alert('Failed to delete material. Please try again.');
-    });
+function handleReceived(id, status) {
+    if (status === 'Sent') {
+        // If status is 'Sent', perform delete operation for 'Received' button
+        fetch(`/api/materials/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(() => {
+                alert('Material marked as received and deleted.');
+                fetchMaterials();  // Refresh the table to remove the deleted row
+            })
+            .catch(error => console.error('Error deleting material:', error));
+    } else {
+        // If status is not 'Sent', treat it as 'Delete' and delete the material
+        fetch(`/api/materials/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(() => {
+                alert('Material deleted successfully.');
+                fetchMaterials();  // Refresh the table after deletion
+            })
+            .catch(error => console.error('Error deleting material:', error));
+    }
 }
+
 
 function updatePaginationInfo() {
     const totalPages = Math.ceil(totalMaterials / materialsPerPage);
@@ -122,20 +137,14 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Set up interval to refresh the table every 5 seconds
     setInterval(refreshTable, 5000);
-    
-    // Initial fetch
-    fetchMaterials();
-    function refreshTable() {
-        console.log('Refreshing table...');
-        fetchMaterials();
-    }
-    
-    
-    function startPolling() {
-        fetchMaterials();
-        setInterval(fetchMaterials, 5000); // Poll every 5 seconds
-    }
-    
-    startPolling();
 });
 
+
+window.deleteMaterial = function(id) {
+    fetch(`/api/materials/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(() => {
+            fetchMaterials(); // Refresh the table after deletion
+        })
+        .catch(error => console.error('Error deleting material:', error));
+    };
