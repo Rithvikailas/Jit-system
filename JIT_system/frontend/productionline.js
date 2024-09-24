@@ -11,6 +11,15 @@ document.getElementById('materialForm').addEventListener('submit', function(even
     const quantity = document.getElementById('quantity').value;
     const description = document.getElementById('description').value;
 
+    if (!line || !workOrderNumber || !materialPartNumber) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    // Disable the submit button to prevent multiple submissions
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
     fetch('/api/materials', {
         method: 'POST',
         headers: {
@@ -29,11 +38,13 @@ document.getElementById('materialForm').addEventListener('submit', function(even
         console.log('Material added:', data);
         alert('Material successfully added!');
         document.getElementById('materialForm').reset();
+        submitButton.disabled = false; // Re-enable the button after submission
         fetchMaterials(); // Refresh the table after new material is added
     })
     .catch(error => {
         console.error('Error adding material:', error);
         alert('Failed to add material. Please try again.');
+        submitButton.disabled = false; // Re-enable the button if there's an error
     });
 });
 
@@ -52,7 +63,6 @@ function fetchMaterials() {
 
             const tableBody = document.querySelector('#materialTable tbody');
             tableBody.innerHTML = ''; // Clear existing rows
-            
 
             paginatedMaterials.forEach(material => {
                 const row = document.createElement('tr');
@@ -60,16 +70,12 @@ function fetchMaterials() {
                     <td>${material.line}</td>
                     <td>${material.workOrderNumber}</td>
                     <td>${material.materialPartNumber}</td>
-                    <td>${material.quantity ? material.quantity : '-'}</td>
-                    <td>${material.description ? material.description : '-'}</td>
+                    <td>${material.quantity || '-'}</td>
+                    <td>${material.description || '-'}</td>
                     <td>
-                        <button class="${material.status === 'Sent' ? 'Received' : 'Delete'}" onclick="handleReceived('${material._id}', '${material.status}')">
+                        <button class="action-btn" onclick="handleReceived('${material._id}', '${material.status}')">
                             ${material.status === 'Sent' ? 'Received' : 'Delete'}
                         </button>
-                    </td>
-
-                    
-                </td>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -105,7 +111,6 @@ function handleReceived(id, status) {
     }
 }
 
-
 function updatePaginationInfo() {
     const totalPages = Math.ceil(totalMaterials / materialsPerPage);
     document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
@@ -131,24 +136,4 @@ document.getElementById('nextPage').addEventListener('click', () => {
 
 document.addEventListener("DOMContentLoaded", function() {
     fetchMaterials(); // Fetch and display materials when the page loads
-    function refreshTable() {
-        fetchMaterials();
-    }
-    
-    // Set up interval to refresh the table every 5 seconds
-    setInterval(refreshTable, 5000);
 });
-
-
-window.deleteMaterial = function(id) {
-    fetch(`/api/materials/${id}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(() => {
-            fetchMaterials(); // Refresh the table after deletion
-        })
-        .catch(error => console.error('Error deleting material:', error));
-    };
-
-
-
-    

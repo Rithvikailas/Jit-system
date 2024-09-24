@@ -66,68 +66,56 @@
 
     <script src="productionline.js"></script>
     <script>
-        // Retrieve the Excel data from localStorage
-const excelData = JSON.parse(localStorage.getItem('excelData')) || {};
+        fetch('/api/excelData')
+    .then(response => response.json())
+    .then(excelData => {
+        // Process the fetched data
+        console.log('Fetched Excel Data:', excelData); // Add this line for debugging
+        // Populate Line dropdown with sheet names
+        Object.keys(excelData).forEach(line => {
+            const option = document.createElement('option');
+            option.value = line;
+            option.textContent = line;
+            document.getElementById('line').appendChild(option);
+        });
 
-// Populate the Line dropdown
-function populateLineDropdown() {
-    const lineSelect = document.getElementById('line');
-    lineSelect.innerHTML = '<option value="">Select a Line</option>'; // Reset options
+        // Handle Line selection to populate Work Order dropdown
+        document.getElementById('line').addEventListener('change', function () {
+            const selectedLine = document.getElementById('line').value;
+            const workOrderSelect = document.getElementById('workOrderNumber');
+            workOrderSelect.innerHTML = '<option value="">Select a Work Order</option>'; // Reset Work Order dropdown
+            document.getElementById('materialPartNumber').innerHTML = '<option value="">Select a Material</option>'; // Reset Material dropdown
 
-    // Add each line (sheet name) as an option
-    Object.keys(excelData).forEach(line => {
-        const option = document.createElement('option');
-        option.value = line;
-        option.textContent = line; // Set text to sheet name
-        lineSelect.appendChild(option);
+            if (selectedLine && excelData[selectedLine]) {
+                Object.keys(excelData[selectedLine]).forEach(workOrder => {
+                    const option = document.createElement('option');
+                    option.value = workOrder;
+                    option.textContent = workOrder;
+                    workOrderSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Handle Work Order selection to populate Material dropdown
+        document.getElementById('workOrderNumber').addEventListener('change', function () {
+            const selectedLine = document.getElementById('line').value;
+            const selectedWorkOrder = document.getElementById('workOrderNumber').value;
+            const materialSelect = document.getElementById('materialPartNumber');
+            materialSelect.innerHTML = '<option value="">Select a Material</option>';  // Reset Material dropdown
+
+            if (selectedLine && selectedWorkOrder && excelData[selectedLine][selectedWorkOrder]) {
+                excelData[selectedLine][selectedWorkOrder].forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material;
+                    option.textContent = material;
+                    materialSelect.appendChild(option);
+                });
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching Excel data:', error);
     });
-}
-
-// Populate Work Order Number dropdown based on selected Line
-function populateWorkOrderDropdown(workOrders) {
-    const workOrderSelect = document.getElementById('workOrderNumber');
-    workOrderSelect.innerHTML = '<option value="">Select a Work Order</option>'; // Reset options
-
-    workOrders.forEach(order => {
-        const option = document.createElement('option');
-        option.value = order;
-        option.textContent = order;
-        workOrderSelect.appendChild(option);
-    });
-}
-
-// Populate Material Part Number dropdown based on selected Work Order
-function populateMaterialDropdown(materials) {
-    const materialSelect = document.getElementById('materialPartNumber');
-    materialSelect.innerHTML = '<option value="">Select a Material</option>'; // Reset options
-
-    materials.forEach(material => {
-        const option = document.createElement('option');
-        option.value = material;
-        option.textContent = material;
-        materialSelect.appendChild(option);
-    });
-}
-
-// Event listener for line selection
-document.getElementById('line').addEventListener('change', function() {
-    const selectedLine = this.value;
-    const workOrders = Object.keys(excelData[selectedLine] || {});
-    populateWorkOrderDropdown(workOrders);
-    document.getElementById('materialPartNumber').innerHTML = '<option value="">Select a Material</option>'; // Reset materials dropdown
-});
-
-// Event listener for work order selection
-document.getElementById('workOrderNumber').addEventListener('change', function() {
-    const selectedLine = document.getElementById('line').value;
-    const selectedWorkOrder = this.value;
-    populateMaterialDropdown(excelData[selectedLine][selectedWorkOrder] || []);
-});
-
-// Populate line dropdown on page load
-document.addEventListener('DOMContentLoaded', () => {
-    populateLineDropdown();
-});
 
     </script>
 </body>

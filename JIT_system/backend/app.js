@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Material = require('./models/material');
 const cors = require('cors');
 const path = require('path');  // Add path for serving static files
-
+const ExcelData = require('./models/exceldata');
 const app = express();
 
 app.use(cors());
@@ -20,6 +20,33 @@ mongoose.connect(process.env.DB, {
     useUnifiedTopology: true
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB...', err));
+
+
+
+
+  app.post('/api/excelData', async (req, res) => {
+    try {
+        const excelData = req.body; // Excel data in JSON format
+        await ExcelData.deleteMany({}); // Remove old data
+        const newExcelData = new ExcelData({ data: excelData });
+        await newExcelData.save();
+        res.json({ message: 'Excel data uploaded successfully!' });
+    } catch (error) {
+        console.error('Error processing Excel data:', error);
+        res.status(500).json({ message: 'Error processing file' });
+    }
+});
+
+// API to fetch Excel data for dropdowns (used in `productionline.html`)
+app.get('/api/excelData', async (req, res) => {
+    try {
+        const excelData = await ExcelData.findOne();
+        res.json(excelData ? excelData.data : {});
+    } catch (error) {
+        console.error('Error fetching Excel data:', error);
+        res.status(500).json({ message: 'Error fetching data' });
+    }
+});
 
 // API endpoint to get all materials
 app.get('/api/materials', async (req, res) => {

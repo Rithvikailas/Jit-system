@@ -62,41 +62,37 @@ function handleFileUpload(event) {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
 
-        // Initialize the structure for lines, work orders, and materials
         const lines = {};
 
-        // Loop through each sheet in the Excel file
+        // Process each sheet (line) in the Excel file
         workbook.SheetNames.forEach((sheetName) => {
             const worksheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            // Iterate through each row (skip the first row which is the header)
             jsonData.slice(1).forEach(row => {
-                const workOrder = row[0] || ""; // First column is work order number (handle empty values)
-                const material = row[1] || "";  // Second column is material part number (handle empty values)
+                const workOrder = row[0]; // Work order number
+                const material = row[1];  // Material part number
 
-                // Initialize the line entry if it doesn't exist
                 if (!lines[sheetName]) {
                     lines[sheetName] = {};
                 }
 
-                // Initialize the work order entry if it doesn't exist
-                if (!lines[sheetName][workOrder] && workOrder) { // Only create entry if workOrder is not empty
+                if (!lines[sheetName][workOrder]) {
                     lines[sheetName][workOrder] = [];
                 }
 
-                // Add material to the corresponding work order, only if material is not empty
-                if (workOrder && material) {
-                    lines[sheetName][workOrder].push(material);
-                }
+                lines[sheetName][workOrder].push(material);
             });
         });
 
-        // Store lines in localStorage for access in productionline.html
-        localStorage.setItem('excelData', JSON.stringify(lines));
-
-        // Show success message
-        alert('Excel data uploaded successfully.');
+        // Send Excel data to backend for storage
+        fetch('/api/excelData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(lines)
+        }).then(response => response.json())
+          .then(data => alert(data.message))
+          .catch(error => console.error('Error uploading Excel data:', error));
     };
 
     reader.readAsArrayBuffer(file);
