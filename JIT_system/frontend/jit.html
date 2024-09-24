@@ -6,13 +6,18 @@
     <link rel="icon" href="images/delta_electronics_logo_1.png" type="image/icon type">
     <title>JIT Materials</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Add any additional styles here */
-    </style>
 </head>
 <body>
     <a href="index.html" class="back-button">Back</a>
     <h1>JIT Materials</h1>
+
+    <!-- Excel Upload Section -->
+    <h2>Upload Work Order Material Details</h2>
+    <form id="excelForm">
+        <label for="upload">Upload Excel File:</label>
+        <input type="file" id="upload" accept=".xlsx, .xls">
+    </form>
+    <br>
 
     <table id="jitTable">
         <thead>
@@ -36,6 +41,67 @@
         <button id="nextPageBtn">Next</button>
     </div>
 
+    <button id="stopSoundBtn">Stop Alert</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="jit.js"></script>
+
+    <script>
+        // Store data globally
+// Store data globally
+let excelData = {};
+
+// Function to handle file upload and parse the Excel file
+document.getElementById('upload').addEventListener('change', handleFileUpload);
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        // Initialize the structure for lines, work orders, and materials
+        const lines = {};
+
+        // Loop through each sheet in the Excel file
+        workbook.SheetNames.forEach((sheetName) => {
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Iterate through each row (skip the first row which is the header)
+            jsonData.slice(1).forEach(row => {
+                const workOrder = row[0] || ""; // First column is work order number (handle empty values)
+                const material = row[1] || "";  // Second column is material part number (handle empty values)
+
+                // Initialize the line entry if it doesn't exist
+                if (!lines[sheetName]) {
+                    lines[sheetName] = {};
+                }
+
+                // Initialize the work order entry if it doesn't exist
+                if (!lines[sheetName][workOrder] && workOrder) { // Only create entry if workOrder is not empty
+                    lines[sheetName][workOrder] = [];
+                }
+
+                // Add material to the corresponding work order, only if material is not empty
+                if (workOrder && material) {
+                    lines[sheetName][workOrder].push(material);
+                }
+            });
+        });
+
+        // Store lines in localStorage for access in productionline.html
+        localStorage.setItem('excelData', JSON.stringify(lines));
+
+        // Show success message
+        alert('Excel data uploaded successfully.');
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+    </script>
 </body>
 </html>

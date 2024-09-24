@@ -1,7 +1,19 @@
 document.addEventListener("DOMContentLoaded", function() {
     let currentPage = 1;
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     let totalItems = 0; // Total items fetched from the server
+    let initialUserInteraction = false; 
+
+    // Add a reference to the audio file
+    const successAudio = new Audio('sound/test1.mp3');  // Ensure the path is correct
+
+    function ensureUserInteraction() {
+        if (!initialUserInteraction) {
+            document.body.addEventListener('click', () => {
+                initialUserInteraction = true;
+            }, { once: true });
+        }
+    }
 
     fetchMaterials();
 
@@ -14,8 +26,19 @@ document.addEventListener("DOMContentLoaded", function() {
                     return;
                 }
 
+                const previousTotalItems = totalItems;
                 totalItems = data.length; // Total number of items
-                renderTable(data);
+
+                // Only update the table and play sound if new data is added (not removed)
+                if (totalItems > previousTotalItems) {
+                    renderTable(data);
+                    if (initialUserInteraction) {
+                        successAudio.play();  // Play the sound if user interacted with the page
+                    }
+                } else if (totalItems < previousTotalItems) {
+                    renderTable(data);  // Just update the table without playing the sound
+                }
+
                 updatePaginationControls();
             })
             .catch(error => console.error('Error fetching materials:', error));
@@ -29,6 +52,11 @@ document.addEventListener("DOMContentLoaded", function() {
         tableBody.innerHTML = '';  // Clear previous table rows
 
         paginatedData.forEach(material => {
+            const isSent = localStorage.getItem(`material_${material._id}`) === 'sent';
+            const buttonText = isSent ? 'Sent' : 'Send';
+            const buttonDisabled = isSent ? 'disabled' : '';
+            const buttonClass = material.status === isSent ? 'Sent' : 'Send';
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${material.line || 'N/A'}</td>
@@ -37,7 +65,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td>${material.quantity || '-'}</td>
                 <td>${material.description || '-'}</td>
                 <td>
-                    <button onclick="deleteMaterial('${material._id}')">Delete</button>
+                    <button class="${buttonClass}" id="sendBtn-${material._id}" ${buttonDisabled} onclick="sendMaterial('${material._id}')">${buttonText}</button>
+                    
                 </td>
             `;
             tableBody.appendChild(row);
@@ -69,13 +98,29 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    window.deleteMaterial = function(id) {
-        fetch(`/api/materials/${id}`, { method: 'DELETE' })
+    window.sendMaterial = function(id) {
+        ensureUserInteraction(); // Ensure user interaction before playing sound
+        fetch(`/api/materials/send/${id}`, { method: 'PUT' })
             .then(response => response.json())
-            .then(() => fetchMaterials())
-            .catch(error => console.error('Error deleting material:', error));
+            .then(() => {
+                localStorage.setItem(`material_${id}`, 'sent'); // Store the state in localStorage
+                fetchMaterials();  // Refresh the table
+                const button = document.getElementById(`sendBtn-${id}`);
+                if (button) {
+                    button.textContent = 'Sent';  // Update button text to "Sent"
+                    button.disabled = true; // Disable the button after it is marked as "Sent"
+                }
+            })
+            .catch(error => console.error('Error sending material:', error));
     };
 
+    const stopSoundBtn = document.getElementById("stopSoundBtn");
+    stopSoundBtn.addEventListener("click", function() {
+        successAudio.pause();
+        successAudio.currentTime = 0;
+    });
+
+    // Function to refresh the table
     function refreshTable() {
         fetchMaterials();
     }

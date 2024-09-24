@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Line</title>
     <link rel="icon" href="images/delta_electronics_logo_1.png" type="image/icon type">
+    <title>Production Line</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <a href="index.html" class="back-button">Back</a>
     <h1>Production Line</h1>
+
     <form id="materialForm">
         <label for="line">Line:</label>
         <select name="line" id="line" required>
-            <option value="AP_L01">AP_L01</option>
-            <option value="AP_L02">AP_L02</option>
-            <option value="AP_L03">AP_L03</option>
-            <option value="AP_L04">AP_L04</option>
-            <option value="AP_L05">AP_L05</option>
-            <option value="AP_L06">AP_L06</option>
-            <option value="AP_L07">AP_L07</option>
-            <option value="AP_L08">AP_L08</option>
-            <option value="UPS_L01">UPS_L01</option>
-          </select>
-        <!-- <input type="" id="line" name="line" required><br><br> -->
+            <option value="">Select a Line</option>
+            <!-- Lines (Sheet Names) will be populated here dynamically -->
+        </select>
 
         <label for="workOrderNumber">Work Order Number:</label>
-        <input type="text" id="workOrderNumber" name="workOrderNumber" required><br><br>
+        <select id="workOrderNumber" name="workOrderNumber" required>
+            <option value="">Select a Work Order</option>
+            <!-- Work Orders will be populated here dynamically -->
+        </select>
+        <br><br>
 
         <label for="materialPartNumber">Material Part Number:</label>
-        <input type="text" id="materialPartNumber" name="materialPartNumber" required><br><br>
+        <select id="materialPartNumber" name="materialPartNumber" required>
+            <option value="">Select a Material</option>
+            <!-- Materials will be populated here dynamically -->
+        </select>
+        <br><br>
 
         <label for="quantity">Quantity:</label>
         <input type="number" id="quantity" name="quantity"><br><br>
@@ -57,7 +58,6 @@
         </tbody>
     </table>
 
-    <!-- Pagination controls -->
     <div id="pagination">
         <button id="prevPage">Previous</button>
         <span id="pageInfo"></span>
@@ -65,5 +65,70 @@
     </div>
 
     <script src="productionline.js"></script>
+    <script>
+        // Retrieve the Excel data from localStorage
+const excelData = JSON.parse(localStorage.getItem('excelData')) || {};
+
+// Populate the Line dropdown
+function populateLineDropdown() {
+    const lineSelect = document.getElementById('line');
+    lineSelect.innerHTML = '<option value="">Select a Line</option>'; // Reset options
+
+    // Add each line (sheet name) as an option
+    Object.keys(excelData).forEach(line => {
+        const option = document.createElement('option');
+        option.value = line;
+        option.textContent = line; // Set text to sheet name
+        lineSelect.appendChild(option);
+    });
+}
+
+// Populate Work Order Number dropdown based on selected Line
+function populateWorkOrderDropdown(workOrders) {
+    const workOrderSelect = document.getElementById('workOrderNumber');
+    workOrderSelect.innerHTML = '<option value="">Select a Work Order</option>'; // Reset options
+
+    workOrders.forEach(order => {
+        const option = document.createElement('option');
+        option.value = order;
+        option.textContent = order;
+        workOrderSelect.appendChild(option);
+    });
+}
+
+// Populate Material Part Number dropdown based on selected Work Order
+function populateMaterialDropdown(materials) {
+    const materialSelect = document.getElementById('materialPartNumber');
+    materialSelect.innerHTML = '<option value="">Select a Material</option>'; // Reset options
+
+    materials.forEach(material => {
+        const option = document.createElement('option');
+        option.value = material;
+        option.textContent = material;
+        materialSelect.appendChild(option);
+    });
+}
+
+// Event listener for line selection
+document.getElementById('line').addEventListener('change', function() {
+    const selectedLine = this.value;
+    const workOrders = Object.keys(excelData[selectedLine] || {});
+    populateWorkOrderDropdown(workOrders);
+    document.getElementById('materialPartNumber').innerHTML = '<option value="">Select a Material</option>'; // Reset materials dropdown
+});
+
+// Event listener for work order selection
+document.getElementById('workOrderNumber').addEventListener('change', function() {
+    const selectedLine = document.getElementById('line').value;
+    const selectedWorkOrder = this.value;
+    populateMaterialDropdown(excelData[selectedLine][selectedWorkOrder] || []);
+});
+
+// Populate line dropdown on page load
+document.addEventListener('DOMContentLoaded', () => {
+    populateLineDropdown();
+});
+
+    </script>
 </body>
 </html>
