@@ -136,4 +136,10 @@ document.getElementById('nextPage').addEventListener('click', () => {
 
 document.addEventListener("DOMContentLoaded", function() {
     fetchMaterials(); // Fetch and display materials when the page loads
+    function refreshTable() {
+        fetchMaterials();
+    }
+    
+    // Set up interval to refresh the table every 5 seconds
+    setInterval(refreshTable, 5000);
 });
