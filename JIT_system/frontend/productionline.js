@@ -73,7 +73,7 @@ function fetchMaterials() {
                     <td>${material.quantity || '-'}</td>
                     <td>${material.description || '-'}</td>
                     <td>
-                        <button class="action-btn" onclick="handleReceived('${material._id}', '${material.status}')">
+                        <button class="${material.status === 'Sent' ? 'Received' : 'Delete'}" onclick="handleReceived('${material._id}', '${material.status}')">
                             ${material.status === 'Sent' ? 'Received' : 'Delete'}
                         </button>
                     </td>
