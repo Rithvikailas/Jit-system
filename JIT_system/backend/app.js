@@ -21,7 +21,7 @@ mongoose.connect(process.env.DB, {
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB...', err));
 
-const allowedIPs = ['203.0.113.5', '198.51.100.0/24','0.0.0.0/0']; // Add your allowed IPs here
+const allowedIPs = ['203.0.113.5', '198.51.100.0/24','0.0.0.0/0', '59.164.68.133/32']; // Add your allowed IPs here
 
 // Middleware to check IP
 app.use((req, res, next) => {
