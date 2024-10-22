@@ -21,7 +21,26 @@ mongoose.connect(process.env.DB, {
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB...', err));
 
+const allowedIPs = ['203.0.113.5', '198.51.100.0/24','0.0.0.0/0']; // Add your allowed IPs here
 
+// Middleware to check IP
+app.use((req, res, next) => {
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    
+    // Check if the client IP is in the allowed list
+    const isAllowed = allowedIPs.some(ip => {
+        // Check if the IP matches or if it’s within a CIDR range
+        return ip.includes('/') ? 
+            require('ip6').cidrSubnet(ip).contains(clientIP) : 
+            ip === clientIP;
+    });
+
+    if (isAllowed) {
+        next(); // Allow access
+    } else {
+        res.status(403).send('Access denied'); // Deny access
+    }
+});
 
 
   app.post('/api/excelData', async (req, res) => {
